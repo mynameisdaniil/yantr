@@ -32,7 +32,7 @@ Yantr.prototype.__taskExecutor = function (task, cb) {
   Yaff(task.depends || []).parEach(function (dependency) {
     self.__execByTag(dependency, this);
   }).seq(function () {
-    task.task(this);
+    task.payload(this);
   }).finally(cb);
 };
 

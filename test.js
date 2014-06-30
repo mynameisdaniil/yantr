@@ -6,7 +6,7 @@ var tasks = [
   {
     depends: [],
     tags: ['test', 'hello'],
-    task: function (cb) {
+    payload: function (cb) {
       log('Hello');
       cb();
     }
@@ -14,7 +14,7 @@ var tasks = [
   {
     depends: ['hello', 'space'],
     tags: ['test', 'world'],
-    task: function (cb) {
+    payload: function (cb) {
       log('world!');
       cb();
     }
@@ -22,7 +22,7 @@ var tasks = [
   {
     depends: ['hello'],
     tags: ['test', 'space'],
-    task: function (cb) {
+    payload: function (cb) {
       log('_');
       cb();
     }
@@ -30,7 +30,7 @@ var tasks = [
   {
     depends: ['hello', 'space', 'world'],
     tags: [],
-    task: function (cb) {
+    payload: function (cb) {
       log('Hello world!');
       cb();
     }
@@ -39,7 +39,7 @@ var tasks = [
     name: 'hello tags',
     depends: ['test'],
     tags: [],
-    task: function (cb) {
+    payload: function (cb) {
       log('Hello tags!');
       cb();
     }
