@@ -17,5 +17,5 @@
     "node": true,
     "indent": 2,
     "newcap": false,
-    "strict": false,
+    "strict": false
 }
