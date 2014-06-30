@@ -20,31 +20,25 @@ var Yantr = module.exports = function Yantr(tasks) {
 Yantr.prototype.run = function (cb) {
   var self = this;
   Yaff(this.tasks).parEach(function (task) {
-      self.__taskExecutor(task, this);
-    }).finally(cb);
-};
-
-Yantr.prototype.__isDone = function (tag, cb) {
-  var self = this;
-  var done = this.index[tag].every(function (task) {
-    return task.done;
-  });
-  if (done)
-    return cb();
-  setImmediate(function () {
-    self.__isDone(tag, cb);
-  });
+    self.__taskExecutor(task, this);
+  }).finally(cb);
 };
 
 Yantr.prototype.__taskExecutor = function (task, cb) {
-  (function (task, self) {
-    Yaff(task.depends || []).parEach(function (dependency) {
-        self.__isDone(dependency, this);
-      }).seq(function () {
-        task.task(this);
-      }).seq(function () {
-        task.done = true;
-        this();
-      }).finally(cb);
-  })(task, this);
+  var self = this;
+  if (task.exec)
+    return cb();
+  task.exec = true;
+  Yaff(task.depends || []).parEach(function (dependency) {
+    self.__execByTag(dependency, this);
+  }).seq(function () {
+    task.task(this);
+  }).finally(cb);
+};
+
+Yantr.prototype.__execByTag = function (tag, cb) {
+  var self = this;
+  Yaff(this.index[tag] || []).parEach(function (task) {
+    self.__taskExecutor(task, this);
+  }).finally(cb);
 };
