@@ -11,6 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "maybe2": "^0.1.4",
-    "yaff": "0.0.18"
+    "yaff": "0.0.19"
   }
 }
