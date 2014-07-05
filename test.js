@@ -4,6 +4,16 @@ var Yantr = require('./index.js');
 
 var tasks = [
   {
+    id: 0,
+    depends: ['test'],
+    tags: [],
+    payload: function (cb) {
+      log('Hello tags!');
+      cb();
+    }
+  },
+  {
+    id: 1,
     depends: [],
     tags: ['test', 'hello'],
     payload: function (cb) {
@@ -12,6 +22,7 @@ var tasks = [
     }
   },
   {
+    id: 2,
     depends: ['hello', 'space'],
     tags: ['test', 'world'],
     payload: function (cb) {
@@ -20,6 +31,7 @@ var tasks = [
     }
   },
   {
+    id: 3,
     depends: ['hello'],
     tags: ['test', 'space'],
     payload: function (cb) {
@@ -28,6 +40,7 @@ var tasks = [
     }
   },
   {
+    id: 4,
     depends: ['hello', 'space', 'world'],
     tags: [],
     payload: function (cb) {
@@ -35,15 +48,6 @@ var tasks = [
       cb();
     }
   },
-  {
-    name: 'hello tags',
-    depends: ['test'],
-    tags: [],
-    payload: function (cb) {
-      log('Hello tags!');
-      cb();
-    }
-  }
 ];
 
 Yantr(tasks).run(function () {

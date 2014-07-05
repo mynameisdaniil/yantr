@@ -1,11 +1,25 @@
 var Yaff  = require('yaff');
 var maybe = require('maybe2');
+var log = console.log;
 
 var Yantr = module.exports = function Yantr(tasks) {
   if (!(this instanceof Yantr))
     return new Yantr(tasks);
   this.tasks = maybe(tasks).is(Array).getOrElse([]);
-  this.index = this.tasks.reduce(function (index, task) {
+  this.index = __buildIndex(this.tasks);
+};
+
+Yantr.prototype.run = function (cb) {
+  var self = this;
+  if (__isCyclic(this.tasks))
+    return cb(new Error('Provided graph contains circular dependencies'));
+  Yaff(this.tasks).parEach(function (task) {
+    __taskExecutor(task, self.index, this);
+  }).finally(cb);
+};
+
+var __buildIndex = function (tasks) {
+  return tasks.reduce(function (index, task) {
     return maybe(task.tags).map(function (tags) {
       tags.forEach(function (tag) {
         if(!index[tag])
@@ -16,11 +30,41 @@ var Yantr = module.exports = function Yantr(tasks) {
   }, {});
 };
 
-Yantr.prototype.run = function (cb) {
-  var self = this;
-  Yaff(this.tasks).parEach(function (task) {
-    __taskExecutor(task, self.index, this);
-  }).finally(cb);
+var arrayUnique = function(arr) {
+  return arr.reduce(function(ret, item) {
+    if (ret.indexOf(item) == -1)
+      ret.push(item);
+    return ret;
+  }, []);
+};
+
+var __isCyclic = function (tasks) { //TODO complete
+  if (!tasks.length)
+    return false;
+  var free_tasks = tasks.filter(function (task) {
+    return !(task.depends || []).length;
+  });
+  if (!free_tasks.length)
+    return true;
+  var new_tasks = tasks.filter(function (task) {
+    return !!(task.depends || []).length;
+  });
+  var free_tags = arrayUnique(free_tasks.reduce(function (ret, task) {
+    return ret.concat(task.tags);
+  }, []));
+  var tags_to_remove = free_tags.filter(function (tag) {
+    return !new_tasks.some(function (task) {
+      return task.tags.indexOf(tag) != -1;
+    });
+  });
+  return __isCyclic(new_tasks.map(function (task) {
+    task.depends = task.depends.filter(function (dep) {
+      return !tags_to_remove.some(function (tag) {
+        return tag == dep;
+      });
+    });
+    return task;
+  }));
 };
 
 var __isDone = function (tag, index, cb) {
@@ -38,5 +82,8 @@ var __taskExecutor = function (task, index, cb) {
     __isDone(tag, index, this);
   }).seq(function () {
     task.payload(this);
-  }).dummy(task.done = true).finally(cb);
+  }).seq(function () {
+    task.done = true;
+    this();
+  }).finally(cb);
 };
