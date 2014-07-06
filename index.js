@@ -6,7 +6,15 @@ var Yantr = module.exports = function Yantr(tasks) {
   if (!(this instanceof Yantr))
     return new Yantr(tasks);
   this.tasks = maybe(tasks).is(Array).getOrElse([]);
-  this.index = __buildIndex(this.tasks);
+  this.index = tasks.reduce(function (index, task) {
+    return maybe(task.tags).map(function (tags) {
+      tags.forEach(function (tag) {
+        if(!index[tag])
+          index[tag] = [];
+        index[tag].push(task);
+      });
+    }).getOrElse(index);
+  }, {});
 };
 
 Yantr.prototype.run = function (cb) {
@@ -18,27 +26,7 @@ Yantr.prototype.run = function (cb) {
   }).finally(cb);
 };
 
-var __buildIndex = function (tasks) {
-  return tasks.reduce(function (index, task) {
-    return maybe(task.tags).map(function (tags) {
-      tags.forEach(function (tag) {
-        if(!index[tag])
-          index[tag] = [];
-        index[tag].push(task);
-      });
-    }).getOrElse(index);
-  }, {});
-};
-
-var arrayUnique = function(arr) {
-  return arr.reduce(function(ret, item) {
-    if (ret.indexOf(item) == -1)
-      ret.push(item);
-    return ret;
-  }, []);
-};
-
-var __isCyclic = function (tasks) { //TODO complete
+var __isCyclic = function (tasks) {
   if (!tasks.length)
     return false;
   var free_tasks = tasks.filter(function (task) {
@@ -49,10 +37,13 @@ var __isCyclic = function (tasks) { //TODO complete
   var new_tasks = tasks.filter(function (task) {
     return !!(task.depends || []).length;
   });
-  var free_tags = arrayUnique(free_tasks.reduce(function (ret, task) {
+  var tags_to_remove = free_tasks.reduce(function (ret, task) {
     return ret.concat(task.tags);
-  }, []));
-  var tags_to_remove = free_tags.filter(function (tag) {
+  }, []).reduce(function (ret, tag) {
+    if (ret.indexOf(tag) == -1)
+      ret.push(tag);
+    return ret;
+  }, []).filter(function (tag) {
     return !new_tasks.some(function (task) {
       return task.tags.indexOf(tag) != -1;
     });
