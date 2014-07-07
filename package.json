@@ -1,6 +1,6 @@
 {
   "name": "yantr",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Yet Another Node Task Runner",
   "main": "index.js",
   "repository": "git@github.com:mynameisdaniil/yantr.git",
