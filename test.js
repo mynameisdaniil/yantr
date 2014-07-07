@@ -4,45 +4,40 @@ var Yantr = require('./index.js');
 
 var tasks = [
   {
-    id: 0,
-    depends: ['test'],
     tags: [],
+    depends: ['test'],
     payload: function (cb) {
       log('Hello tags!');
       cb();
     }
   },
   {
-    id: 1,
-    depends: [],
     tags: ['test', 'hello'],
+    depends: [],
     payload: function (cb) {
       log('Hello');
       cb();
     }
   },
   {
-    id: 2,
-    depends: ['hello', 'space'],
     tags: ['test', 'world'],
+    depends: ['hello', 'space'],
     payload: function (cb) {
       log('world!');
       cb();
     }
   },
   {
-    id: 3,
-    depends: ['hello'],
     tags: ['test', 'space'],
+    depends: ['hello'],
     payload: function (cb) {
       log('_');
       cb();
     }
   },
   {
-    id: 4,
-    depends: ['hello', 'space', 'world'],
     tags: [],
+    depends: ['hello', 'space', 'world'],
     payload: function (cb) {
       log('Hello world!');
       cb();
@@ -50,7 +45,6 @@ var tasks = [
   },
 ];
 
-Yantr(tasks).run(function () {
-  log(arguments);
-  log('Done!');
+Yantr(tasks).run(function (e) {
+  log(e? e:'Done!');
 });
