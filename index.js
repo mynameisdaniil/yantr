@@ -1,6 +1,5 @@
 var Yaff  = require('yaff');
 var maybe = require('maybe2');
-var log = console.log;
 
 var Yantr = module.exports = function Yantr(tasks) {
   if (!(this instanceof Yantr))
@@ -19,7 +18,9 @@ var Yantr = module.exports = function Yantr(tasks) {
 
 Yantr.prototype.run = function (cb) {
   var self = this;
-  if (__isCyclic(this.tasks))
+  if (__isCyclic(this.tasks.map(function (task) {
+    return {tags: task.tags, depends: task.depends};
+  })))
     return cb(new Error('Provided graph contains circular dependencies'));
   Yaff(this.tasks).parEach(function (task) {
     __taskExecutor(task, self.index, this);
